@@ -17,8 +17,6 @@ extern void __exception_closeall();
 extern s32 __IOS_ShutdownSubsystems();
 
 int main(int argc, char **argv) {
-   u32 level;
-
    VIDEO_Init();
    switch(VIDEO_GetCurrentTvMode()) {
       case VI_NTSC:
@@ -69,12 +67,9 @@ int main(int argc, char **argv) {
    void (*ep)() = (void(*)())load_dol_image(mem);
    printf("jumping to 0x%08X\n", (unsigned int)ep);
 
-   __IOS_ShutdownSubsystems();
-   _CPU_ISR_Disable (level);
-   __exception_closeall ();
-   printf("__exception_closeall() done. Jumping to ep now...\n");
-   ep();
-   _CPU_ISR_Restore (level);
+   SYS_ResetSystem(SYS_SHUTDOWN,0,0);
+
+   __lwp_thread_stopmultitasking(ep);
 
    return 0; // fixes gcc warning
 }
